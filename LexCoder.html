@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<!--
+  LexCoder: ASD Utterances Annotation Tool
+  Copyright © 2025 Hamidreza Komaki. All rights reserved.
+  Developer: Hamidreza Komaki
+  Email: HKomaki@Stanford.edu
+  GitHub: https://github.com/Hamidreza-Komaki
+  
+  This software is proprietary and confidential. Unauthorized copying, 
+  distribution, modification, or use is strictly prohibited.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <!--
+    LexCoder - Proprietary Software
+    Developer: Hamidreza Komaki (HKomaki@Stanford.edu)
+    GitHub: https://github.com/Hamidreza-Komaki
+    Copyright © 2025 - All Rights Reserved
+  -->
+  <title>LexCoder: ASD Utterances Annotation Tool</title>
+  <!-- Copyright © 2025 Hamidreza Komaki - HKomaki@Stanford.edu -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 250 150' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='neuroGrad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%2300d4ff;stop-opacity:1' /%3E%3Cstop offset='50%25' style='stop-color:%235b86e5;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%2336d1dc;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M20 60 Q40 30 60 50 Q80 70 100 40 Q120 20 140 50 Q160 80 180 60' fill='none' stroke='url(%23neuroGrad)' stroke-width='16' stroke-linecap='round'/%3E%3Ctext x='0' y='55' font-family='Courier New, monospace' font-size='64' fill='%2300d4ff' font-weight='900'%3E%26lt;%3C/text%3E%3Ctext x='185' y='75' font-family='Courier New, monospace' font-size='64' fill='%2300d4ff' font-weight='900'%3E/%26gt;%3C/text%3E%3Ccircle cx='40' cy='40' r='10' fill='%2300ff88'/%3E%3Ccircle cx='80' cy='70' r='10' fill='%23ff6b6b'/%3E%3Ccircle cx='120' cy='20' r='10' fill='%234ecdc4'/%3E%3Ccircle cx='160' cy='80' r='10' fill='%23ffe66d'/%3E%3Ctext x='30' y='135' font-family='Arial, sans-serif' font-size='96' fill='%23ffffff' font-weight='900'%3ELex%3C/text%3E%3Ctext x='140' y='135' font-family='Courier New, monospace' font-size='96' fill='%2300d4ff' font-weight='900'%3ECoder%3C/text%3E%3C/svg%3E">
+  <style>
+    /* 
+      LexCoder Stylesheet - Proprietary Software
+      Developer: Hamidreza Komaki
+      Email: HKomaki@Stanford.edu
+      GitHub: https://github.com/Hamidreza-Komaki
+      Copyright © 2025 All Rights Reserved
+    */
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;background:#f5f5f5;height:100vh;display:flex;flex-direction:column}
+    .header{background:#2c3e50;color:#fff;padding:1rem;display:flex;justify-content:space-between;align-items:center}
+    .header-left{display:flex;align-items:center;gap:15px}
+    .logo-svg{width:160px;height:96px}
+    .header h1{margin:0;font-size:24px}
+    .file-controls{display:flex;gap:10px;align-items:center}
+    .btn{padding:8px 16px;border:none;border-radius:4px;cursor:pointer;font-size:14px;transition:all .3s}
+    .btn-primary{background:#3498db;color:#fff}.btn-primary:hover{background:#2980b9}
+    .btn-success{background:#27ae60;color:#fff}.btn-success:hover{background:#229954}
+    .main-container{display:flex;flex:1;gap:20px;padding:20px}
+    .video-section{flex:2;display:flex;flex-direction:column;gap:20px}
+    .video-container{position:relative;background:#000;border-radius:8px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+    video{width:100%;height:auto;max-height:600px;display:block}
+    .subtitle-overlay{position:absolute;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;padding:8px 14px;border-radius:6px;font-size:18px;font-weight:bold;display:none;z-index:10;text-align:center;max-width:90%;word-wrap:break-word;pointer-events:none}
+    .subtitle-adult{top:6%}
+    .subtitle-kid{bottom:6%}
+    .subtitle-note{top:50%;right:10px;left:auto;transform:translateY(-50%);background:rgba(255,193,7,.9);color:#000;font-size:14px;font-weight:normal;max-width:200px;text-align:left}
+    .coding-section{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+    @media (max-width: 900px){.coding-section{grid-template-columns:1fr}}
+    .coding-group{background:#fff;border-radius:8px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+    .coding-header{font-size:18px;font-weight:700;margin-bottom:12px;text-align:center;padding:10px;border-radius:6px}
+    .kid-header{background:#e8f5e8;color:#2d5a2d;border:2px solid #4CAF50}
+    .adult-header{background:#e8f0ff;color:#1e3a8a;border:2px solid #3498db}
+    .annotation-buttons{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+    .option-btn{padding:12px 18px;font-size:14px;font-weight:700;border:2px solid transparent;border-radius:6px;cursor:pointer;transition:all .2s;user-select:none;min-width:110px}
+    .kid-btn:nth-child(1),.adult-btn:nth-child(1){background:#e74c3c;color:#fff}
+    .kid-btn:nth-child(2),.adult-btn:nth-child(2){background:#f39c12;color:#fff}
+    .kid-btn:nth-child(3),.adult-btn:nth-child(3){background:#2ecc71;color:#fff}
+    .kid-btn:nth-child(4),.adult-btn:nth-child(4){background:#3498db;color:#fff}
+    .kid-btn:nth-child(5),.adult-btn:nth-child(5){background:#9b59b6;color:#fff}
+    .option-btn.active{transform:scale(1.05);border-color:#fff;box-shadow:0 0 20px rgba(0,0,0,.3)}
+    .option-btn:hover{transform:translateY(-2px)}
+    .sidebar{flex:1;background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1);display:flex;flex-direction:column;max-height:calc(100vh - 140px)}
+    .sidebar-header{background:#34495e;color:#fff;padding:15px;font-weight:700;border-radius:8px 8px 0 0}
+    .annotations-list{flex:1;overflow-y:auto;padding:10px}
+    .annotation-item{background:#f8f9fa;border:1px solid #dee2e6;border-radius:6px;padding:12px;margin-bottom:8px;cursor:pointer;transition:all .3s;display:flex;justify-content:space-between;align-items:center;border-left:4px solid}
+    .annotation-item.kid{border-left-color:#4CAF50}.annotation-item.adult{border-left-color:#3498db}
+    .annotation-item:hover{background:#e9ecef;transform:translateX(5px)}
+    .annotation-info{flex:1}
+    .annotation-speaker{font-weight:700;font-size:12px;margin-bottom:2px}
+    .annotation-speaker.kid{color:#4CAF50}.annotation-speaker.adult{color:#3498db}
+    .annotation-option{font-weight:700;font-size:14px}
+    .annotation-time{color:#666;font-size:12px;margin-top:4px}
+    .annotation-actions{display:flex;gap:6px}
+    .btn-small{padding:4px 8px;font-size:12px;border:none;border-radius:3px;cursor:pointer}
+    .btn-edit{background:#f39c12;color:#fff}.btn-delete{background:#e74c3c;color:#fff}
+    .status-bar{background:#34495e;color:#fff;padding:10px 20px;font-size:14px;display:flex;justify-content:space-between;align-items:center}
+    .hidden{display:none !important}
+    .video-placeholder{height:450px;display:flex;align-items:center;justify-content:center;background:#2c3e50;color:#fff;font-size:18px;border-radius:8px}
+    .edit-form{background:#f8f9fa;border:2px solid #007bff;padding:10px;border-radius:6px;margin-bottom:8px}
+    .edit-form input,.edit-form select{margin:5px;padding:5px;border:1px solid #ccc;border-radius:3px}
+    .edit-form button{margin:5px;padding:5px 10px;border:none;border-radius:3px;cursor:pointer}
+    .edit-form .save-btn{background:#28a745;color:#fff}
+    .edit-form .cancel-btn{background:#6c757d;color:#fff}
+    .stats-summary{background:#f8f9fa;border-radius:6px;padding:10px;margin:10px;font-size:12px}
+    .stats-row{display:flex;justify-content:space-between;margin-bottom:5px}
+    .stats-row:last-child{margin-bottom:0}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      <svg class="logo-svg" viewBox="0 0 250 150" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="neuroGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:1" />
+            <stop offset="50%" style="stop-color:#5b86e5;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#36d1dc;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <!-- Wave representing the spectrum -->
+        <path d="M20 60 Q40 30 60 50 Q80 70 100 40 Q120 20 140 50 Q160 80 180 60" 
+              fill="none" stroke="url(#neuroGrad)" stroke-width="5" stroke-linecap="round"/>
+        
+        <!-- Code brackets embracing the wave -->
+        <text x="10" y="45" font-family="'Courier New', monospace" font-size="24" fill="#00d4ff" font-weight="bold">&lt;</text>
+        <text x="175" y="65" font-family="'Courier New', monospace" font-size="24" fill="#00d4ff" font-weight="bold">/&gt;</text>
+        
+        <!-- Small dots along the wave -->
+        <circle cx="40" cy="40" r="3" fill="#00ff88"/>
+        <circle cx="80" cy="70" r="3" fill="#ff6b6b"/>
+        <circle cx="120" cy="20" r="3" fill="#4ecdc4"/>
+        <circle cx="160" cy="80" r="3" fill="#ffe66d"/>
+        
+        <!-- Text -->
+        <text x="50" y="120" font-family="Arial, sans-serif" font-size="20" fill="#ffffff" font-weight="400">Lex</text>
+        <text x="82" y="120" font-family="'Courier New', monospace" font-size="20" fill="#00d4ff" font-weight="600">Coder</text>
+      </svg>
+      <h1>ASD Utterances Annotation Tool</h1>
+    </div>
+    <div class="file-controls">
+      <input type="file" id="videoUpload" accept="video/*" class="hidden">
+      <input type="file" id="csvUpload" accept=".csv" class="hidden">
+      <button class="btn btn-primary" onclick="loadVideo()">Load Video</button>
+      <button class="btn btn-primary" onclick="loadCSV()">Load CSV</button>
+      <button class="btn btn-success" onclick="saveAnnotations()">Save CSV</button>
+      <label style="color:#fff;font-size:14px;display:flex;align-items:center;gap:6px">
+        <input type="checkbox" id="subtitleToggle" checked> Show Utterance Subtitles
+      </label>
+    </div>
+  </div>
+
+  <div class="main-container">
+    <div class="video-section">
+      <div class="video-container">
+        <video id="videoPlayer" controls preload="auto" playsinline class="hidden">Your browser does not support the video tag.</video>
+        <div id="subtitleAdult" class="subtitle-overlay subtitle-adult"></div>
+        <div id="subtitleKid" class="subtitle-overlay subtitle-kid"></div>
+        <div id="subtitleNote" class="subtitle-overlay subtitle-note"></div>
+        <div id="videoPlaceholder" class="video-placeholder">Load a video to start coding utterances</div>
+      </div>
+
+      <div class="coding-section">
+        <!-- Kid column -->
+        <div class="coding-group">
+          <div class="coding-header kid-header">KID UTTERANCES</div>
+          <div class="annotation-buttons">
+            <button class="option-btn kid-btn" data-option="1" data-speaker="kid">Unintelligible (A)</button>
+            <button class="option-btn kid-btn" data-option="2" data-speaker="kid">Imitative (S)</button>
+            <button class="option-btn kid-btn" data-option="3" data-speaker="kid">Verbal Prompt (D)</button>
+            <button class="option-btn kid-btn" data-option="4" data-speaker="kid">Non-Verbal Prompt (F)</button>
+            <button class="option-btn kid-btn" data-option="5" data-speaker="kid">Spontaneous (V)</button>
+          </div>
+        </div>
+
+        <!-- Adult column -->
+        <div class="coding-group">
+          <div class="coding-header adult-header">ADULT UTTERANCES</div>
+          <div class="annotation-buttons">
+            <button class="option-btn adult-btn" data-option="1" data-speaker="adult">Unintelligible (N)</button>
+            <button class="option-btn adult-btn" data-option="2" data-speaker="adult">Imitative (J)</button>
+            <button class="option-btn adult-btn" data-option="3" data-speaker="adult">Verbal Prompt (K)</button>
+            <button class="option-btn adult-btn" data-option="4" data-speaker="adult">Non-Verbal Prompt (L)</button>
+            <button class="option-btn adult-btn" data-option="5" data-speaker="adult">Spontaneous (;)</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <div class="sidebar-header">Utterance Codes</div>
+      <div id="statsSummary" class="stats-summary hidden"></div>
+      <div class="annotations-list" id="annotationsList"></div>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <span id="statusText">Ready - Load a video to begin</span>
+    <span id="videoTime">00:00 / 00:00</span>
+  </div>
+
+  <script>
+    /**
+     * LexCoder: ASD Utterances Annotation Tool
+     * 
+     * Copyright © 2025 Hamidreza Komaki. All rights reserved.
+     * 
+     * Developer: Hamidreza Komaki
+     * Email: HKomaki@Stanford.edu
+     * GitHub: https://github.com/Hamidreza-Komaki
+     * 
+     * This software is proprietary and confidential. Any unauthorized copying,
+     * distribution, modification, reverse engineering, or use of this software
+     * is strictly prohibited and may result in legal action.
+     * 
+     * For licensing inquiries, contact: HKomaki@Stanford.edu
+     */
+
+    // App state - Proprietary implementation by Hamidreza Komaki
+    let annotations = []; // {speaker:'kid'|'adult', option:1-5, startTime, endTime, duration, note}
+    let currentAnnotation = null;
+    let isRecording = false;
+    let currentObjectUrl = null;
+    let activeButton = null;
+    let showSubtitles = true;
+    let currentVideoFileName = ''; // Store the loaded video filename
+
+    // DOM refs (assigned in init)
+    let video, videoPlaceholder, annotationsList, statusText, videoTimeEl;
+    let subtitleAdult, subtitleKid, subtitleNote, subtitleToggle;
+
+    /* 
+     * Core application constants
+     * Copyright © 2025 Hamidreza Komaki (HKomaki@Stanford.edu)
+     * GitHub: https://github.com/Hamidreza-Komaki
+     */
+
+    const optionLabels = {1:'Unintelligible',2:'Imitative',3:'Verbal Prompt',4:'Non-Verbal Prompt',5:'Spontaneous'};
+    const labelToOption = {'Unintelligible':1,'Imitative':2,'Verbal Prompt':3,'Non-Verbal Prompt':4,'Spontaneous':5};
+
+    // Application initialization - Developer: Hamidreza Komaki
+    function init(){
+      video = document.getElementById('videoPlayer');
+      videoPlaceholder = document.getElementById('videoPlaceholder');
+      annotationsList = document.getElementById('annotationsList');
+      statusText = document.getElementById('statusText');
+      videoTimeEl = document.getElementById('videoTime');
+      subtitleAdult = document.getElementById('subtitleAdult');
+      subtitleKid = document.getElementById('subtitleKid');
+      subtitleNote = document.getElementById('subtitleNote');
+      subtitleToggle = document.getElementById('subtitleToggle');
+
+      document.getElementById('videoUpload').addEventListener('change',(e)=>{
+        const f = e.target.files && e.target.files[0];
+        if(f) handleVideoLoad(f);
+      });
+      document.getElementById('csvUpload').addEventListener('change',(e)=>{
+        const f = e.target.files && e.target.files[0];
+        if(f) handleCSVLoad(f);
+      });
+
+      document.querySelectorAll('.option-btn').forEach(btn=>{
+        btn.addEventListener('mousedown', startAnnotation);
+        btn.addEventListener('mouseup', endAnnotation);
+        btn.addEventListener('mouseleave', endAnnotation);
+        btn.addEventListener('touchstart', startAnnotation, {passive:false});
+        btn.addEventListener('touchend', endAnnotation);
+        btn.addEventListener('contextmenu', e=>e.preventDefault());
+      });
+
+      video.addEventListener('timeupdate', ()=>{ updateVideoTime(); updateSubtitles(); });
+
+      subtitleToggle.addEventListener('change', ()=>{
+        showSubtitles = subtitleToggle.checked;
+        if(!showSubtitles) hideSubtitles();
+      });
+
+      updateAnnotationsList();
+    }
+
+    // Video loading functionality - Proprietary code by Hamidreza Komaki (HKomaki@Stanford.edu)
+    function loadVideo(){
+      try {
+        statusText.textContent = 'Opening file picker...';
+        document.getElementById('videoUpload').click();
+      } catch(err) {
+        console.error('Error opening file picker:', err);
+        statusText.textContent = 'Error opening file picker';
+      }
+    }
+
+    function loadCSV(){ 
+      document.getElementById('csvUpload').click(); 
+    }
+
+    /* CSV parsing algorithm - Copyright © 2025 Hamidreza Komaki
+     * GitHub: https://github.com/Hamidreza-Komaki */
+    function handleVideoLoad(file){
+      try{
+        if(!file){ 
+          statusText.textContent = 'No video selected.'; 
+          return; 
+        }
+
+        // Revoke previous blob URL if any
+        if(currentObjectUrl){
+          URL.revokeObjectURL(currentObjectUrl);
+          currentObjectUrl = null;
+        }
+
+        statusText.textContent = 'Loading video...';
+
+        // Reset video element
+        video.pause();
+        video.removeAttribute('src');
+        video.load();
+
+        // Create new object URL
+        currentObjectUrl = URL.createObjectURL(file);
+        video.src = currentObjectUrl;
+
+        // Show video player immediately
+        video.classList.remove('hidden');
+        videoPlaceholder.classList.add('hidden');
+
+        // Store video filename for later use
+        currentVideoFileName = file.name.replace(/\.[^/.]+$/, ""); // Remove file extension
+
+        // Set up event listeners
+        const onLoadedMetadata = () => {
+          statusText.textContent = `Video loaded: ${file.name}`;
+          updateVideoTime();
+          video.removeEventListener('loadedmetadata', onLoadedMetadata);
+        };
+
+        const onError = () => {
+          const errorCode = video.error ? video.error.code : 'unknown';
+          statusText.textContent = `Error loading video (code: ${errorCode}). Try MP4/H.264 or WebM format.`;
+          video.removeEventListener('error', onError);
+        };
+
+        video.addEventListener('loadedmetadata', onLoadedMetadata);
+        video.addEventListener('error', onError);
+
+        // Load the video
+        video.load();
+
+      } catch(err) {
+        console.error('Error loading video:', err);
+        statusText.textContent = `Failed to load video: ${err.message || err}`;
+      }
+    }
+
+    // CSV import (8-col zipped header; legacy fallback)
+    // Proprietary parsing implementation by Hamidreza Komaki
+    function handleCSVLoad(file){
+      const reader = new FileReader();
+      reader.onload = (e)=> parseCSV(e.target.result);
+      reader.readAsText(file);
+    }
+
+    function parseCSV(csvText){
+      const lines = csvText.trim().split(/\r?\n/);
+      if(lines.length===0) return;
+      annotations = [];
+
+      const expected11col = ['Utterance_Type_Kid','Start_Time_Kid','End_Time_Kid','Duration_Kid','Note_Kid','Utterance_Type_Adult','Start_Time_Adult','End_Time_Adult','Duration_Adult','Note_Adult','Coder_Name'];
+      const expected10col = ['Utterance_Type_Kid','Start_Time_Kid','End_Time_Kid','Duration_Kid','Note_Kid','Utterance_Type_Adult','Start_Time_Adult','End_Time_Adult','Duration_Adult','Note_Adult'];
+      const expected8col = ['Utterance_Type_Kid','Start_Time_Kid','End_Time_Kid','Duration_Kid','Utterance_Type_Adult','Start_Time_Adult','End_Time_Adult','Duration_Adult'];
+      
+      let startIndex = 0;
+      let format = 'auto'; // 'auto', '11col', '10col', '8col', or 'legacy'
+      
+      if(lines.length>0){
+        const first = splitCSV(lines[0]).map(x=>(x||'').trim());
+        
+        if(first.length===11 && expected11col.every((h,i)=>h===first[i])){
+          format = '11col';
+          startIndex = 1;
+        } else if(first.length===10 && expected10col.every((h,i)=>h===first[i])){
+          format = '10col';
+          startIndex = 1;
+        } else if(first.length===8 && expected8col.every((h,i)=>h===first[i])){
+          format = '8col';
+          startIndex = 1;
+        } else if(/[A-Za-z]/.test(lines[0])) {
+          startIndex = 1; // generic header
+          format = 'legacy';
+        }
+      }
+
+      for(let i=startIndex;i<lines.length;i++){
+        const raw = lines[i].trim();
+        if(!raw) continue;
+        if(/^(TOTALS|Total All|KID TOTALS|ADULT TOTALS)/i.test(raw)) continue;
+        const cols = splitCSV(raw);
+
+        if(format === '11col' && cols.length>=11){
+          // New 11-column format with notes and coder name
+          const kType = (cols[0]||'').trim();
+          const kStart = (cols[1]||'').trim();
+          const kEnd   = (cols[2]||'').trim();
+          const kNote  = (cols[4]||'').trim();
+          const aType = (cols[5]||'').trim();
+          const aStart = (cols[6]||'').trim();
+          const aEnd   = (cols[7]||'').trim();
+          const aNote  = (cols[9]||'').trim();
+
+          if(kType && kStart && kEnd){
+            const ko = normalizeType(kType), ks = parseFloat(kStart), ke = parseFloat(kEnd);
+            if(isFinite(ko) && isFinite(ks) && isFinite(ke) && ke>ks){
+              annotations.push({speaker:'kid', option:ko, startTime:ks, endTime:ke, duration:+(ke-ks).toFixed(3), note:kNote});
+            }
+          }
+          if(aType && aStart && aEnd){
+            const ao = normalizeType(aType), as = parseFloat(aStart), ae = parseFloat(aEnd);
+            if(isFinite(ao) && isFinite(as) && isFinite(ae) && ae>as){
+              annotations.push({speaker:'adult', option:ao, startTime:as, endTime:ae, duration:+(ae-as).toFixed(3), note:aNote});
+            }
+          }
+        } else if(format === '10col' && cols.length>=10){
+          // New 10-column format with notes
+          const kType = (cols[0]||'').trim();
+          const kStart = (cols[1]||'').trim();
+          const kEnd   = (cols[2]||'').trim();
+          const kNote  = (cols[4]||'').trim();
+          const aType = (cols[5]||'').trim();
+          const aStart = (cols[6]||'').trim();
+          const aEnd   = (cols[7]||'').trim();
+          const aNote  = (cols[9]||'').trim();
+
+          if(kType && kStart && kEnd){
+            const ko = normalizeType(kType), ks = parseFloat(kStart), ke = parseFloat(kEnd);
+            if(isFinite(ko) && isFinite(ks) && isFinite(ke) && ke>ks){
+              annotations.push({speaker:'kid', option:ko, startTime:ks, endTime:ke, duration:+(ke-ks).toFixed(3), note:kNote});
+            }
+          }
+          if(aType && aStart && aEnd){
+            const ao = normalizeType(aType), as = parseFloat(aStart), ae = parseFloat(aEnd);
+            if(isFinite(ao) && isFinite(as) && isFinite(ae) && ae>as){
+              annotations.push({speaker:'adult', option:ao, startTime:as, endTime:ae, duration:+(ae-as).toFixed(3), note:aNote});
+            }
+          }
+        } else if((format === '8col' || format === 'auto') && cols.length>=8){
+          // Legacy 8-column format without notes
+          const kType = (cols[0]||'').trim();
+          const kStart = (cols[1]||'').trim();
+          const kEnd   = (cols[2]||'').trim();
+          const aType = (cols[4]||'').trim();
+          const aStart = (cols[5]||'').trim();
+          const aEnd   = (cols[6]||'').trim();
+
+          if(kType && kStart && kEnd){
+            const ko = normalizeType(kType), ks = parseFloat(kStart), ke = parseFloat(kEnd);
+            if(isFinite(ko) && isFinite(ks) && isFinite(ke) && ke>ks){
+              annotations.push({speaker:'kid', option:ko, startTime:ks, endTime:ke, duration:+(ke-ks).toFixed(3), note:''});
+            }
+          }
+          if(aType && aStart && aEnd){
+            const ao = normalizeType(aType), as = parseFloat(aStart), ae = parseFloat(aEnd);
+            if(isFinite(ao) && isFinite(as) && isFinite(ae) && ae>as){
+              annotations.push({speaker:'adult', option:ao, startTime:as, endTime:ae, duration:+(ae-as).toFixed(3), note:''});
+            }
+          }
+        } else if (cols.length>=4){
+          // legacy: Speaker,Type,Start,End,(Duration?)
+          const speaker = (cols[0]||'').trim().toLowerCase();
+          const uType = (cols[1]||'').trim();
+          const s = (cols[2]||'').trim();
+          const e = (cols[3]||'').trim();
+          if((speaker==='kid'||speaker==='adult') && uType && s && e){
+            const opt = normalizeType(uType);
+            const st = parseFloat(s), en = parseFloat(e);
+            if(isFinite(opt) && isFinite(st) && isFinite(en) && en>st){
+              annotations.push({speaker, option:opt, startTime:st, endTime:en, duration:+(en-st).toFixed(3), note:''});
+            }
+          }
+        }
+      }
+
+      annotations.sort((a,b)=>a.startTime - b.startTime);
+      updateAnnotationsList();
+      statusText.textContent = `Loaded ${annotations.length} utterance codes and mapped to video timeline`;
+    }
+
+    function normalizeType(val){
+      if(labelToOption.hasOwnProperty(val)) return labelToOption[val];
+      const n = parseInt(val,10);
+      if(n>=1 && n<=5) return n;
+      return NaN;
+    }
+
+    // CSV splitter that honors quotes
+    function splitCSV(line){
+      const out=[], n=line.length; let cur='', inQ=false;
+      for(let i=0;i<n;i++){
+        const ch=line[i];
+        if(ch==='\"'){
+          if(inQ && line[i+1]==='\"'){ cur+='\"'; i++; }
+          else inQ=!inQ;
+        }else if(ch===',' && !inQ){ out.push(cur); cur=''; }
+        else cur+=ch;
+      }
+      out.push(cur);
+      return out;
+    }
+
+    // Export: zip kid & adult by index with notes and coder name (11-column format)
+    // Advanced CSV export algorithm - Developer: Hamidreza Komaki (HKomaki@Stanford.edu)
+    function saveAnnotations(){
+      // Get coder name from user
+      const coderName = prompt('Enter coder name:', '');
+      if (!coderName || !coderName.trim()) {
+        statusText.textContent = 'Save cancelled - coder name required';
+        return;
+      }
+
+      // Generate recommended filename
+      const baseFileName = currentVideoFileName || 'utterance_codes';
+      const recommendedFileName = `${baseFileName}_${coderName.trim()}.csv`;
+      
+      // Create a temporary download link to trigger save dialog
+      const kid = annotations.filter(a=>a.speaker==='kid').sort((a,b)=>a.startTime - b.startTime);
+      const adult = annotations.filter(a=>a.speaker==='adult').sort((a,b)=>a.startTime - b.startTime);
+      const rows = Math.max(kid.length, adult.length);
+
+      // Calculate totals for each type
+      const kidStats = {1:0, 2:0, 3:0, 4:0, 5:0};
+      const adultStats = {1:0, 2:0, 3:0, 4:0, 5:0};
+      
+      annotations.forEach(a => {
+        if(a.speaker === 'kid') kidStats[a.option]++;
+        else if(a.speaker === 'adult') adultStats[a.option]++;
+      });
+
+      const kidTotal = Object.values(kidStats).reduce((x,y) => x+y, 0);
+      const adultTotal = Object.values(adultStats).reduce((x,y) => x+y, 0);
+
+      let csv = 'Utterance_Type_Kid,Start_Time_Kid,End_Time_Kid,Duration_Kid,Note_Kid,Utterance_Type_Adult,Start_Time_Adult,End_Time_Adult,Duration_Adult,Note_Adult,Coder_Name\n';
+      
+      // Add data rows
+      for(let i=0;i<rows;i++){
+        const k = kid[i], a = adult[i];
+        const kType = k ? optionLabels[k.option] : '';
+        const kStart = k ? k.startTime.toFixed(3) : '';
+        const kEnd   = k ? k.endTime.toFixed(3)   : '';
+        const kDur   = k ? k.duration.toFixed(3)  : '';
+        const kNote  = k ? (k.note || '').replace(/"/g, '""') : ''; // Escape quotes
+        const aType = a ? optionLabels[a.option] : '';
+        const aStart = a ? a.startTime.toFixed(3) : '';
+        const aEnd   = a ? a.endTime.toFixed(3)   : '';
+        const aDur   = a ? a.duration.toFixed(3)  : '';
+        const aNote  = a ? (a.note || '').replace(/"/g, '""') : ''; // Escape quotes
+        
+        // Wrap notes in quotes if they contain commas or quotes
+        const kNoteFormatted = kNote && (kNote.includes(',') || kNote.includes('"')) ? `"${kNote}"` : kNote;
+        const aNoteFormatted = aNote && (aNote.includes(',') || aNote.includes('"')) ? `"${aNote}"` : aNote;
+        
+        const coderNameCol = (i === 0) ? coderName.trim() : ''; // Only put coder name in first row
+        csv += `${kType},${kStart},${kEnd},${kDur},${kNoteFormatted},${aType},${aStart},${aEnd},${aDur},${aNoteFormatted},${coderNameCol}\n`;
+      }
+
+      // Add totals section - TOTALS_Kid and TOTALS_Adult on same row (no numbers, just labels)
+      csv += `TOTALS_Kid,,,,,TOTALS_Adult,,,,,\n`;
+      csv += `Unintelligible_Kid,${kidStats[1]},,,,Unintelligible_Adult,${adultStats[1]},,,, \n`;
+      csv += `Imitative_Kid,${kidStats[2]},,,,Imitative_Adult,${adultStats[2]},,,, \n`;
+      csv += `Verbal Prompt_Kid,${kidStats[3]},,,,Verbal Prompt_Adult,${adultStats[3]},,,, \n`;
+      csv += `Non-Verbal Prompt_Kid,${kidStats[4]},,,,Non-Verbal Prompt_Adult,${adultStats[4]},,,, \n`;
+      csv += `Spontaneous_Kid,${kidStats[5]},,,,Spontaneous_Adult,${adultStats[5]},,,, \n`;
+      csv += `Total All Utterances_Kid,${kidTotal},,,,Total All Utterances_Adult,${adultTotal},,,, \n`;
+
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const aEl = document.createElement('a');
+      aEl.href = url;
+      aEl.download = recommendedFileName;
+      aEl.style.display = 'none';
+      document.body.appendChild(aEl);
+      aEl.click();
+      document.body.removeChild(aEl);
+      URL.revokeObjectURL(url);
+      
+      statusText.textContent = `CSV saved as: ${recommendedFileName}`;
+    }
+
+    // Annotation recording - Proprietary implementation
+    // Copyright © 2025 Hamidreza Komaki - GitHub: https://github.com/Hamidreza-Komaki
+    function startAnnotation(e){
+      if(!video || (!video.src && !video.currentSrc)) return;
+      e.preventDefault();
+      const btn = e.currentTarget;
+      const option = parseInt(btn.dataset.option,10);
+      const speaker = btn.dataset.speaker;
+      const startTime = video.currentTime;
+
+      activeButton = btn;
+      btn.classList.add('active');
+
+      currentAnnotation = {speaker, option, startTime, endTime:null, note:''};
+      isRecording = true;
+      statusText.textContent = `Recording ${speaker.toUpperCase()}: ${optionLabels[option]}...`;
+    }
+
+    function endAnnotation(e){
+      if(!isRecording || !currentAnnotation) return;
+      e.preventDefault();
+      finalizeAnnotation();
+    }
+
+    function finalizeAnnotation(){
+      if(!isRecording || !currentAnnotation) return;
+      const endTime = video.currentTime;
+      if(endTime > currentAnnotation.startTime){
+        currentAnnotation.endTime = endTime;
+        currentAnnotation.duration = +(endTime - currentAnnotation.startTime).toFixed(3);
+        annotations.push({...currentAnnotation});
+        annotations.sort((a,b)=>a.startTime - b.startTime);
+        updateAnnotationsList();
+        statusText.textContent = `Utterance coded: ${currentAnnotation.speaker.toUpperCase()}: ${optionLabels[currentAnnotation.option]}`;
+      }
+      if(activeButton) activeButton.classList.remove('active');
+      activeButton = null;
+      isRecording = false;
+      currentAnnotation = null;
+    }
+
+    // --- Keyboard Shortcut Support ---
+    // Custom keyboard mapping system - Developer: Hamidreza Komaki (HKomaki@Stanford.edu)
+    const keyMap = {
+      // Kid
+      'a': {speaker:'kid', option:1},
+      's': {speaker:'kid', option:2},
+      'd': {speaker:'kid', option:3},
+      'f': {speaker:'kid', option:4},
+      'v': {speaker:'kid', option:5},
+      // Adult
+      'n': {speaker:'adult', option:1},
+      'j': {speaker:'adult', option:2},
+      'k': {speaker:'adult', option:3},
+      'l': {speaker:'adult', option:4},
+      ';': {speaker:'adult', option:5}, // Adult Spontaneous
+    };
+
+    function isTypingTarget(e){
+      const t = e.target;
+      return t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
+    }
+
+    function findButton(speaker, option){
+      return document.querySelector(`.option-btn[data-speaker="${speaker}"][data-option="${option}"]`);
+    }
+
+    function startAnnotationKey(speaker, option){
+      if(!video || (!video.src && !video.currentSrc)) return;
+      const btn = findButton(speaker, option);
+      if(btn){ btn.classList.add('active'); }
+      activeButton = btn || null;
+      const startTime = video.currentTime;
+      currentAnnotation = {speaker, option, startTime, endTime:null, note:''};
+      isRecording = true;
+      statusText.textContent = `Recording ${speaker.toUpperCase()}: ${optionLabels[option]}...`;
+    }
+
+    const heldKeys = new Set();
+    document.addEventListener('keydown', (e)=>{
+      // keep existing Space handler intact elsewhere; ignore when typing
+      if(isTypingTarget(e)) return;
+      const k = (e.key || '').toLowerCase();
+      if(keyMap[k] && !heldKeys.has(k)){
+        e.preventDefault();
+        heldKeys.add(k);
+        const {speaker, option} = keyMap[k];
+        startAnnotationKey(speaker, option);
+      }
+    });
+
+    document.addEventListener('keyup', (e)=>{
+      const k = (e.key || '').toLowerCase();
+      if(heldKeys.has(k)){
+        e.preventDefault();
+        heldKeys.delete(k);
+        finalizeAnnotation();
+      }
+    });
+    // --- End Keyboard Shortcut Support ---
+
+    // Annotations list UI - Proprietary interface design
+    // Copyright © 2025 Hamidreza Komaki (HKomaki@Stanford.edu)
+    function updateAnnotationsList(){
+      annotationsList.innerHTML = '';
+      updateStatsSummary();
+
+      annotations.forEach((a,idx)=>{
+        const item = document.createElement('div');
+        item.className = `annotation-item ${a.speaker}`;
+        item.innerHTML = `
+          <div class="annotation-info">
+            <div class="annotation-speaker ${a.speaker}">${a.speaker.toUpperCase()}</div>
+            <div class="annotation-option">${optionLabels[a.option]}</div>
+            <div class="annotation-time">${formatTime(a.startTime)} - ${formatTime(a.endTime)} (${formatTime(a.duration)})</div>
+            ${a.note ? `<div class="annotation-note" style="font-size:12px;color:#666;margin-top:2px;font-style:italic;">"${a.note}"</div>` : ''}
+          </div>
+          <div class="annotation-actions">
+            <button class="btn-small btn-edit" onclick="editAnnotation(${idx})">Edit</button>
+            <button class="btn-small btn-delete" onclick="deleteAnnotation(${idx})">Delete</button>
+          </div>
+        `;
+        item.addEventListener('click',(ev)=>{ if(!ev.target.classList.contains('btn-small')) playAnnotation(a); });
+        annotationsList.appendChild(item);
+      });
+    }
+
+    function updateStatsSummary(){
+      const statsSummary = document.getElementById('statsSummary');
+      if(annotations.length===0){ statsSummary.classList.add('hidden'); statsSummary.innerHTML=''; return; }
+      const kidStats={1:0,2:0,3:0,4:0,5:0}, adultStats={1:0,2:0,3:0,4:0,5:0};
+      annotations.forEach(a=>{ if(a.speaker==='kid') kidStats[a.option]++; else if(a.speaker==='adult') adultStats[a.option]++; });
+      const kidTotal = Object.values(kidStats).reduce((x,y)=>x+y,0);
+      const adultTotal = Object.values(adultStats).reduce((x,y)=>x+y,0);
+      statsSummary.innerHTML = `<div class="stats-row"><strong>Kid:</strong> ${kidTotal} | <strong>Adult:</strong> ${adultTotal} | <strong>Total:</strong> ${annotations.length}</div>`;
+      statsSummary.classList.remove('hidden');
+    }
+
+    function playAnnotation(a){
+      if(!video || (!video.src && !video.currentSrc)) return;
+      video.currentTime = a.startTime;
+      video.play();
+      const stop = ()=>{
+        if(video.currentTime >= a.endTime){
+          video.pause();
+          video.removeEventListener('timeupdate', stop);
+        }
+      };
+      video.addEventListener('timeupdate', stop);
+      statusText.textContent = `Playing ${a.speaker.toUpperCase()}: ${optionLabels[a.option]} utterance`;
+    }
+
+    function editAnnotation(index){
+      const a = annotations[index];
+      const container = document.createElement('div');
+      container.className = 'edit-form';
+      container.innerHTML = `
+        <div>
+          <label>Speaker:</label>
+          <select id="editSpeaker${index}">
+            <option value="kid" ${a.speaker==='kid'?'selected':''}>Kid</option>
+            <option value="adult" ${a.speaker==='adult'?'selected':''}>Adult</option>
+          </select>
+        </div>
+        <div>
+          <label>Type:</label>
+          <select id="editOption${index}">
+            <option value="1" ${a.option===1?'selected':''}>Unintelligible</option>
+            <option value="2" ${a.option===2?'selected':''}>Imitative</option>
+            <option value="3" ${a.option===3?'selected':''}>Verbal Prompt</option>
+            <option value="4" ${a.option===4?'selected':''}>Non-Verbal Prompt</option>
+            <option value="5" ${a.option===5?'selected':''}>Spontaneous</option>
+          </select>
+        </div>
+        <div>
+          <label>Start:</label>
+          <input type="text" id="editStart${index}" value="${formatTime(a.startTime)}">
+          <label>End:</label>
+          <input type="text" id="editEnd${index}" value="${formatTime(a.endTime)}">
+        </div>
+        <div>
+          <label>Note:</label>
+          <input type="text" id="editNote${index}" value="${a.note || ''}" placeholder="Add a note..." style="width:100%;margin-top:5px;">
+        </div>
+        <div>
+          <button class="save-btn" onclick="saveEdit(${index})">Save</button>
+          <button class="cancel-btn" onclick="cancelEdit()">Cancel</button>
+        </div>
+      `;
+      
+      // Find the annotation item and insert the edit form right after it
+      const annotationItems = Array.from(annotationsList.children);
+      const targetItem = annotationItems[index];
+      if(targetItem && targetItem.nextSibling) {
+        annotationsList.insertBefore(container, targetItem.nextSibling);
+      } else {
+        annotationsList.appendChild(container);
+      }
+    }
+
+    function cancelEdit(){ updateAnnotationsList(); }
+
+    function saveEdit(index){
+      const speaker = document.getElementById(`editSpeaker${index}`).value;
+      const option = parseInt(document.getElementById(`editOption${index}`).value,10);
+      const startTime = parseTime(document.getElementById(`editStart${index}`).value);
+      const endTime = parseTime(document.getElementById(`editEnd${index}`).value);
+      const note = document.getElementById(`editNote${index}`).value.trim();
+      
+      if(isFinite(startTime) && isFinite(endTime) && endTime>startTime){
+        annotations[index] = { speaker, option, startTime, endTime, duration:+(endTime-startTime).toFixed(3), note };
+        annotations.sort((a,b)=>a.startTime - b.startTime);
+        statusText.textContent = 'Utterance code updated';
+      }
+      updateAnnotationsList();
+    }
+
+    function deleteAnnotation(index){
+      if(confirm('Are you sure you want to delete this utterance code?')){
+        annotations.splice(index,1);
+        updateAnnotationsList();
+        statusText.textContent = 'Utterance code deleted';
+      }
+    }
+
+    // Video time + formatting
+    function updateVideoTime(){
+      const cur = formatTime(video.currentTime || 0);
+      const dur = formatTime(isFinite(video.duration) ? video.duration : 0);
+      videoTimeEl.textContent = `${cur} / ${dur}`;
+    }
+
+    function formatTime(sec){
+      if(!isFinite(sec)) return '00:00';
+      const m = Math.floor(sec/60);
+      const s = sec % 60;
+      return `${String(m).padStart(2,'0')}:${s.toFixed(3).padStart(6,'0')}`;
+    }
+
+    function parseTime(str){
+      if(!str) return NaN;
+      if(/^\d+(\.\d+)?$/.test(str)) return parseFloat(str);
+      const m = str.match(/^(\d+):(\d+(?:\.\d+)?)$/);
+      if(m){ return parseInt(m[1],10)*60 + parseFloat(m[2]); }
+      return NaN;
+    }
+
+    // Subtitles - Advanced overlay system by Hamidreza Komaki
+    // GitHub: https://github.com/Hamidreza-Komaki
+    function updateSubtitles(){
+      if(!showSubtitles){ hideSubtitles(); return; }
+      const t = video.currentTime || 0;
+      const kidAnn = annotations.find(a=>a.speaker==='kid' && a.startTime<=t && t<a.endTime);
+      const adultAnn = annotations.find(a=>a.speaker==='adult' && a.startTime<=t && t<a.endTime);
+
+      if(adultAnn){ 
+        subtitleAdult.style.display='block'; 
+        subtitleAdult.textContent = `ADULT: ${optionLabels[adultAnn.option]}`; 
+      } else {
+        subtitleAdult.style.display='none';
+      }
+
+      if(kidAnn){ 
+        subtitleKid.style.display='block'; 
+        subtitleKid.textContent = `KID: ${optionLabels[kidAnn.option]}`; 
+      } else {
+        subtitleKid.style.display='none';
+      }
+
+      // Show note subtitle for current utterance
+      const currentAnn = kidAnn || adultAnn;
+      if(currentAnn && currentAnn.note && currentAnn.note.trim()){
+        subtitleNote.style.display='block';
+        subtitleNote.textContent = `Note: ${currentAnn.note.trim()}`;
+      } else {
+        subtitleNote.style.display='none';
+      }
+    }
+
+    function hideSubtitles(){ 
+      subtitleAdult.style.display='none'; 
+      subtitleKid.style.display='none'; 
+      subtitleNote.style.display='none';
+    }
+
+    // Keyboard controls - Enhanced navigation system
+    // Developer: Hamidreza Komaki (HKomaki@Stanford.edu) - Copyright © 2025
+    document.addEventListener('keydown', (e)=>{
+      if(isTypingTarget(e)) return;
+      
+      if(e.code==='Space' && e.target===document.body){
+        e.preventDefault();
+        if(video.paused) video.play(); else video.pause();
+      }
+      
+      // Arrow key navigation - skip 1 second
+      if(e.code==='ArrowLeft'){
+        e.preventDefault();
+        if(video && video.currentTime > 0){
+          video.currentTime = Math.max(0, video.currentTime - 1);
+        }
+      }
+      
+      if(e.code==='ArrowRight'){
+        e.preventDefault();
+        if(video && isFinite(video.duration)){
+          video.currentTime = Math.min(video.duration, video.currentTime + 1);
+        }
+      }
+    });
+
+    // Initialize when DOM is ready
+    // LexCoder initialization - Hamidreza Komaki (HKomaki@Stanford.edu)
+    document.addEventListener('DOMContentLoaded', init);
+    
+    /*
+     * End of LexCoder: ASD Utterances Annotation Tool
+     * 
+     * This software is protected by copyright law and international treaties.
+     * Unauthorized reproduction or distribution of this program, or any portion
+     * of it, may result in severe civil and criminal penalties.
+     * 
+     * Developer: Hamidreza Komaki
+     * Email: HKomaki@Stanford.edu  
+     * GitHub: https://github.com/Hamidreza-Komaki
+     * 
+     * Copyright © 2025 Hamidreza Komaki. All rights reserved.
+     */
+  </script>
+</body>
+<!--
+  LexCoder - End of Document
+  Proprietary software by Hamidreza Komaki
+  Contact: HKomaki@Stanford.edu
+  Copyright © 2025 - Unauthorized use prohibited
+-->
+</html>
