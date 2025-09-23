@@ -124,17 +124,6 @@ Unintelligible_Kid,[count],,,,Unintelligible_Adult,[count],,,,
 
 ## 📚 Documentation
 
-### User Guides
-- [Getting Started Guide](docs/getting-started.md)
-- [Keyboard Shortcuts Reference](docs/shortcuts.md)
-- [Data Export Guide](docs/data-export.md)
-- [Troubleshooting](docs/troubleshooting.md)
-
-### For Researchers
-- [Research Methodology Integration](docs/research-methods.md)
-- [Statistical Analysis Preparation](docs/statistical-analysis.md)
-- [Multi-Coder Reliability](docs/inter-rater-reliability.md)
-
 ## 🏆 Citation
 
 If you use LexCoder in your research, please cite:
@@ -191,7 +180,6 @@ Available for collaborative research projects. Contact for institutional licensi
 - Video synchronization
 - Keyboard shortcut system
 - Notes and coder attribution
-- Professional statistical summaries
 
 ---
 
