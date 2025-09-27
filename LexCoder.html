@@ -40,6 +40,9 @@
     .btn{padding:8px 16px;border:none;border-radius:4px;cursor:pointer;font-size:14px;transition:all .3s}
     .btn-primary{background:#3498db;color:#fff}.btn-primary:hover{background:#2980b9}
     .btn-success{background:#27ae60;color:#fff}.btn-success:hover{background:#229954}
+    .btn-danger{background:#e74c3c;color:#fff}.btn-danger:hover{background:#c0392b}
+    .btn:disabled{background:#bdc3c7;color:#7f8c8d;cursor:not-allowed}
+    .btn:disabled:hover{background:#bdc3c7}
     .main-container{display:flex;flex:1;gap:20px;padding:20px}
     .video-section{flex:2;display:flex;flex-direction:column;gap:20px}
     .video-container{position:relative;background:#000;border-radius:8px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.15)}
@@ -48,12 +51,17 @@
     .subtitle-adult{top:6%}
     .subtitle-kid{bottom:6%}
     .subtitle-note{top:50%;right:10px;left:auto;transform:translateY(-50%);background:rgba(255,193,7,.9);color:#000;font-size:14px;font-weight:normal;max-width:200px;text-align:left}
+    .mode-toggle{background:#34495e;padding:15px;border-radius:8px;margin-bottom:15px;text-align:center}
+    .mode-toggle label{color:#fff;font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center;gap:10px}
+    .mode-toggle input[type="checkbox"]{transform:scale(1.2)}
     .coding-section{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+    .coding-section.simple-mode{grid-template-columns:1fr;max-width:400px;margin:0 auto}
     @media (max-width: 900px){.coding-section{grid-template-columns:1fr}}
     .coding-group{background:#fff;border-radius:8px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
     .coding-header{font-size:18px;font-weight:700;margin-bottom:12px;text-align:center;padding:10px;border-radius:6px}
     .kid-header{background:#e8f5e8;color:#2d5a2d;border:2px solid #4CAF50}
     .adult-header{background:#e8f0ff;color:#1e3a8a;border:2px solid #3498db}
+    .simple-header{background:#fff3cd;color:#856404;border:2px solid #ffc107}
     .annotation-buttons{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
     .option-btn{padding:12px 18px;font-size:14px;font-weight:700;border:2px solid transparent;border-radius:6px;cursor:pointer;transition:all .2s;user-select:none;min-width:110px}
     .kid-btn:nth-child(1),.adult-btn:nth-child(1){background:#e74c3c;color:#fff}
@@ -61,6 +69,9 @@
     .kid-btn:nth-child(3),.adult-btn:nth-child(3){background:#2ecc71;color:#fff}
     .kid-btn:nth-child(4),.adult-btn:nth-child(4){background:#3498db;color:#fff}
     .kid-btn:nth-child(5),.adult-btn:nth-child(5){background:#9b59b6;color:#fff}
+    .adult-btn:nth-child(6){background:#e67e22;color:#fff}
+    .simple-kid-btn{background:#4CAF50;color:#fff;font-size:16px;padding:15px 25px}
+    .simple-adult-btn{background:#3498db;color:#fff;font-size:16px;padding:15px 25px}
     .option-btn.active{transform:scale(1.05);border-color:#fff;box-shadow:0 0 20px rgba(0,0,0,.3)}
     .option-btn:hover{transform:translateY(-2px)}
     .sidebar{flex:1;background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1);display:flex;flex-direction:column;max-height:calc(100vh - 140px)}
@@ -126,9 +137,13 @@
       <input type="file" id="csvUpload" accept=".csv" class="hidden">
       <button class="btn btn-primary" onclick="loadVideo()">Load Video</button>
       <button class="btn btn-primary" onclick="loadCSV()">Load CSV</button>
-      <button class="btn btn-success" onclick="saveAnnotations()">Save CSV</button>
+      <button class="btn btn-success" id="saveBtn" onclick="saveAnnotations()" disabled>Save CSV</button>
+      <button class="btn btn-danger" onclick="resetAll()">Reset</button>
       <label style="color:#fff;font-size:14px;display:flex;align-items:center;gap:6px">
-        <input type="checkbox" id="subtitleToggle" checked> Show Utterance Subtitles
+        <input type="checkbox" id="advancedModeToggle"> Advanced Mode
+      </label>
+      <label style="color:#fff;font-size:14px;display:flex;align-items:center;gap:6px">
+        <input type="checkbox" id="subtitleToggle" checked> Show Subtitles
       </label>
     </div>
   </div>
@@ -143,7 +158,19 @@
         <div id="videoPlaceholder" class="video-placeholder">Load a video to start coding utterances</div>
       </div>
 
-      <div class="coding-section">
+      <!-- Simple Mode (default) -->
+      <div class="coding-section simple-mode" id="simpleCoding">
+        <div class="coding-group">
+          <div class="coding-header simple-header">SIMPLE UTTERANCE CODING</div>
+          <div class="annotation-buttons">
+            <button class="option-btn simple-kid-btn" data-option="6" data-speaker="kid">Kid Utterance (Q)</button>
+            <button class="option-btn simple-adult-btn" data-option="6" data-speaker="adult">Adult Utterance (W)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Advanced Mode -->
+      <div class="coding-section hidden" id="advancedCoding">
         <!-- Kid column -->
         <div class="coding-group">
           <div class="coding-header kid-header">KID UTTERANCES</div>
@@ -160,11 +187,23 @@
         <div class="coding-group">
           <div class="coding-header adult-header">ADULT UTTERANCES</div>
           <div class="annotation-buttons">
-            <button class="option-btn adult-btn" data-option="1" data-speaker="adult">Unintelligible (N)</button>
-            <button class="option-btn adult-btn" data-option="2" data-speaker="adult">Imitative (J)</button>
-            <button class="option-btn adult-btn" data-option="3" data-speaker="adult">Verbal Prompt (K)</button>
-            <button class="option-btn adult-btn" data-option="4" data-speaker="adult">Non-Verbal Prompt (L)</button>
-            <button class="option-btn adult-btn" data-option="5" data-speaker="adult">Spontaneous (;)</button>
+            <button class="option-btn adult-btn" data-option="7" data-speaker="adult">Initiate-Offer (N)</button>
+            <button class="option-btn adult-btn" data-option="8" data-speaker="adult">Prompt (J)</button>
+            <button class="option-btn adult-btn" data-option="9" data-speaker="adult">Model (K)</button>
+            <button class="option-btn adult-btn" data-option="10" data-speaker="adult">Encourage (L)</button>
+            <button class="option-btn adult-btn" data-option="11" data-speaker="adult">Instruct (;)</button>
+            <button class="option-btn adult-btn" data-option="12" data-speaker="adult">Reinforce-Reward (M)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Simple Mode -->
+      <div class="coding-section simple-mode hidden" id="simpleCoding">
+        <div class="coding-group">
+          <div class="coding-header simple-header">SIMPLE UTTERANCE CODING</div>
+          <div class="annotation-buttons">
+            <button class="option-btn simple-kid-btn" data-option="6" data-speaker="kid">Kid Utterance (Q)</button>
+            <button class="option-btn simple-adult-btn" data-option="6" data-speaker="adult">Adult Utterance (W)</button>
           </div>
         </div>
       </div>
@@ -200,17 +239,19 @@
      */
 
     // App state - Proprietary implementation by Hamidreza Komaki
-    let annotations = []; // {speaker:'kid'|'adult', option:1-5, startTime, endTime, duration, note}
+    let annotations = []; // {speaker:'kid'|'adult', option:1-6, startTime, endTime, duration, note}
     let currentAnnotation = null;
     let isRecording = false;
     let currentObjectUrl = null;
     let activeButton = null;
     let showSubtitles = true;
     let currentVideoFileName = ''; // Store the loaded video filename
+    let simpleMode = true; // New: default to simple mode (changed from false)
 
     // DOM refs (assigned in init)
     let video, videoPlaceholder, annotationsList, statusText, videoTimeEl;
-    let subtitleAdult, subtitleKid, subtitleNote, subtitleToggle;
+    let subtitleAdult, subtitleKid, subtitleNote, subtitleToggle, advancedModeToggle;
+    let advancedCoding, simpleCoding, saveBtn;
 
     /* 
      * Core application constants
@@ -218,8 +259,14 @@
      * GitHub: https://github.com/Hamidreza-Komaki
      */
 
-    const optionLabels = {1:'Unintelligible',2:'Imitative',3:'Verbal Prompt',4:'Non-Verbal Prompt',5:'Spontaneous'};
-    const labelToOption = {'Unintelligible':1,'Imitative':2,'Verbal Prompt':3,'Non-Verbal Prompt':4,'Spontaneous':5};
+    const optionLabels = {
+      1:'Unintelligible',2:'Imitative',3:'Verbal Prompt',4:'Non-Verbal Prompt',5:'Spontaneous',6:'Utterance',
+      7:'Initiate-Offer',8:'Prompt',9:'Model',10:'Encourage',11:'Instruct',12:'Reinforce-Reward'
+    };
+    const labelToOption = {
+      'Unintelligible':1,'Imitative':2,'Verbal Prompt':3,'Non-Verbal Prompt':4,'Spontaneous':5,'Utterance':6,
+      'Initiate-Offer':7,'Prompt':8,'Model':9,'Encourage':10,'Instruct':11,'Reinforce-Reward':12
+    };
 
     // Application initialization - Developer: Hamidreza Komaki
     function init(){
@@ -232,6 +279,10 @@
       subtitleKid = document.getElementById('subtitleKid');
       subtitleNote = document.getElementById('subtitleNote');
       subtitleToggle = document.getElementById('subtitleToggle');
+      advancedModeToggle = document.getElementById('advancedModeToggle');
+      advancedCoding = document.getElementById('advancedCoding');
+      simpleCoding = document.getElementById('simpleCoding');
+      saveBtn = document.getElementById('saveBtn');
 
       document.getElementById('videoUpload').addEventListener('change',(e)=>{
         const f = e.target.files && e.target.files[0];
@@ -242,6 +293,7 @@
         if(f) handleCSVLoad(f);
       });
 
+      // Add event listeners to all annotation buttons
       document.querySelectorAll('.option-btn').forEach(btn=>{
         btn.addEventListener('mousedown', startAnnotation);
         btn.addEventListener('mouseup', endAnnotation);
@@ -258,7 +310,53 @@
         if(!showSubtitles) hideSubtitles();
       });
 
+      // Add advanced mode toggle listener
+      advancedModeToggle.addEventListener('change', ()=>{
+        simpleMode = !advancedModeToggle.checked; // Inverted logic - checked means advanced mode
+        toggleCodingMode();
+      });
+
       updateAnnotationsList();
+      updateSaveButtonStates(); // Initialize button states
+    }
+
+    // Document state management functions
+    function markAsChanged(){
+      hasUnsavedChanges = true;
+      updateSaveButtonStates();
+    }
+
+    function markAsSaved(){
+      hasUnsavedChanges = false;
+      lastSavedState = JSON.stringify(annotations);
+      updateSaveButtonStates();
+    }
+
+    function updateSaveButtonStates(){
+      const hasAnnotations = annotations.length > 0;
+      const hasChanges = hasUnsavedChanges || (JSON.stringify(annotations) !== lastSavedState);
+      
+      saveBtn.disabled = !hasAnnotations || !hasChanges;
+      
+      // Update button text to indicate state
+      if(hasChanges && hasAnnotations){
+        saveBtn.textContent = 'Save CSV*';
+      } else {
+        saveBtn.textContent = 'Save CSV';
+      }
+    }
+
+    // New function to toggle between coding modes
+    function toggleCodingMode(){
+      if(simpleMode){
+        simpleCoding.classList.remove('hidden');
+        advancedCoding.classList.add('hidden');
+        statusText.textContent = 'Simple Mode - Basic utterance coding';
+      } else {
+        simpleCoding.classList.add('hidden');
+        advancedCoding.classList.remove('hidden');
+        statusText.textContent = 'Advanced Mode - Detailed utterance coding';
+      }
     }
 
     // Video loading functionality - Proprietary code by Hamidreza Komaki (HKomaki@Stanford.edu)
@@ -334,11 +432,19 @@
       }
     }
 
-    // CSV import (8-col zipped header; legacy fallback)
+    // CSV import (supports both advanced and simple mode formats)
     // Proprietary parsing implementation by Hamidreza Komaki
     function handleCSVLoad(file){
       const reader = new FileReader();
-      reader.onload = (e)=> parseCSV(e.target.result);
+      reader.onload = (e)=> {
+        parseCSV(e.target.result);
+        // Track loaded file info
+        loadedCsvFile = {
+          name: file.name,
+          lastModified: file.lastModified
+        };
+        markAsSaved(); // Initial load counts as saved state
+      };
       reader.readAsText(file);
     }
 
@@ -462,14 +568,58 @@
       }
 
       annotations.sort((a,b)=>a.startTime - b.startTime);
+      
+      // Auto-detect mode based on loaded annotations
+      detectAndSetMode();
+      
       updateAnnotationsList();
       statusText.textContent = `Loaded ${annotations.length} utterance codes and mapped to video timeline`;
+    }
+
+    // Detect appropriate mode based on annotation types and set it automatically
+    function detectAndSetMode(){
+      if(annotations.length === 0) return; // No data to analyze
+      
+      // Check if we have any advanced mode annotations (options 1-5 for kids, 7-12 for adults)
+      const hasAdvancedKidAnnotations = annotations.some(a => 
+        a.speaker === 'kid' && a.option >= 1 && a.option <= 5
+      );
+      const hasAdvancedAdultAnnotations = annotations.some(a => 
+        a.speaker === 'adult' && a.option >= 7 && a.option <= 12
+      );
+      
+      // Check if we have simple mode annotations (option 6 for both)
+      const hasSimpleAnnotations = annotations.some(a => a.option === 6);
+      
+      // Determine appropriate mode
+      let shouldBeAdvanced = false;
+      
+      if(hasAdvancedKidAnnotations || hasAdvancedAdultAnnotations){
+        shouldBeAdvanced = true;
+      } else if(hasSimpleAnnotations && !hasAdvancedKidAnnotations && !hasAdvancedAdultAnnotations){
+        shouldBeAdvanced = false; // Simple mode
+      }
+      
+      // Set the mode if it needs to change
+      if(shouldBeAdvanced && simpleMode){
+        // Switch to advanced mode
+        simpleMode = false;
+        advancedModeToggle.checked = true;
+        toggleCodingMode();
+        statusText.textContent += ' - Switched to Advanced Mode (detected detailed utterance types)';
+      } else if(!shouldBeAdvanced && !simpleMode){
+        // Switch to simple mode
+        simpleMode = true;
+        advancedModeToggle.checked = false;
+        toggleCodingMode();
+        statusText.textContent += ' - Switched to Simple Mode (detected basic utterance types)';
+      }
     }
 
     function normalizeType(val){
       if(labelToOption.hasOwnProperty(val)) return labelToOption[val];
       const n = parseInt(val,10);
-      if(n>=1 && n<=5) return n;
+      if(n>=1 && n<=12) return n; // Updated to support options 1-12
       return NaN;
     }
 
@@ -488,8 +638,7 @@
       return out;
     }
 
-    // Export: zip kid & adult by index with notes and coder name (11-column format)
-    // Advanced CSV export algorithm - Developer: Hamidreza Komaki (HKomaki@Stanford.edu)
+    // Save functionality - prompts for coder name and saves CSV
     function saveAnnotations(){
       // Get coder name from user
       const coderName = prompt('Enter coder name:', '');
@@ -500,16 +649,34 @@
 
       // Generate recommended filename
       const baseFileName = currentVideoFileName || 'utterance_codes';
-      const recommendedFileName = `${baseFileName}_${coderName.trim()}.csv`;
+      const modeIndicator = !simpleMode ? 'advanced' : 'simple';
+      const recommendedFileName = `${baseFileName}_${modeIndicator}_${coderName.trim()}.csv`;
       
-      // Create a temporary download link to trigger save dialog
+      const csvContent = generateCSVContent(coderName.trim());
+      const blob = new Blob([csvContent], {type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const aEl = document.createElement('a');
+      aEl.href = url;
+      aEl.download = recommendedFileName;
+      aEl.style.display = 'none';
+      document.body.appendChild(aEl);
+      aEl.click();
+      document.body.removeChild(aEl);
+      URL.revokeObjectURL(url);
+      
+      markAsSaved();
+      statusText.textContent = `CSV saved as: ${recommendedFileName}`;
+    }
+
+    // Generate CSV content
+    function generateCSVContent(coderName){
       const kid = annotations.filter(a=>a.speaker==='kid').sort((a,b)=>a.startTime - b.startTime);
       const adult = annotations.filter(a=>a.speaker==='adult').sort((a,b)=>a.startTime - b.startTime);
       const rows = Math.max(kid.length, adult.length);
 
       // Calculate totals for each type
-      const kidStats = {1:0, 2:0, 3:0, 4:0, 5:0};
-      const adultStats = {1:0, 2:0, 3:0, 4:0, 5:0};
+      const kidStats = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0};
+      const adultStats = {7:0, 8:0, 9:0, 10:0, 11:0, 12:0, 6:0};
       
       annotations.forEach(a => {
         if(a.speaker === 'kid') kidStats[a.option]++;
@@ -528,42 +695,79 @@
         const kStart = k ? k.startTime.toFixed(3) : '';
         const kEnd   = k ? k.endTime.toFixed(3)   : '';
         const kDur   = k ? k.duration.toFixed(3)  : '';
-        const kNote  = k ? (k.note || '').replace(/"/g, '""') : ''; // Escape quotes
+        const kNote  = k ? (k.note || '').replace(/"/g, '""') : '';
         const aType = a ? optionLabels[a.option] : '';
         const aStart = a ? a.startTime.toFixed(3) : '';
         const aEnd   = a ? a.endTime.toFixed(3)   : '';
         const aDur   = a ? a.duration.toFixed(3)  : '';
-        const aNote  = a ? (a.note || '').replace(/"/g, '""') : ''; // Escape quotes
+        const aNote  = a ? (a.note || '').replace(/"/g, '""') : '';
         
-        // Wrap notes in quotes if they contain commas or quotes
         const kNoteFormatted = kNote && (kNote.includes(',') || kNote.includes('"')) ? `"${kNote}"` : kNote;
         const aNoteFormatted = aNote && (aNote.includes(',') || aNote.includes('"')) ? `"${aNote}"` : aNote;
         
-        const coderNameCol = (i === 0) ? coderName.trim() : ''; // Only put coder name in first row
+        const coderNameCol = (i === 0) ? coderName : '';
         csv += `${kType},${kStart},${kEnd},${kDur},${kNoteFormatted},${aType},${aStart},${aEnd},${aDur},${aNoteFormatted},${coderNameCol}\n`;
       }
 
-      // Add totals section - TOTALS_Kid and TOTALS_Adult on same row (no numbers, just labels)
+      // Add totals section
       csv += `TOTALS_Kid,,,,,TOTALS_Adult,,,,,\n`;
-      csv += `Unintelligible_Kid,${kidStats[1]},,,,Unintelligible_Adult,${adultStats[1]},,,, \n`;
-      csv += `Imitative_Kid,${kidStats[2]},,,,Imitative_Adult,${adultStats[2]},,,, \n`;
-      csv += `Verbal Prompt_Kid,${kidStats[3]},,,,Verbal Prompt_Adult,${adultStats[3]},,,, \n`;
-      csv += `Non-Verbal Prompt_Kid,${kidStats[4]},,,,Non-Verbal Prompt_Adult,${adultStats[4]},,,, \n`;
-      csv += `Spontaneous_Kid,${kidStats[5]},,,,Spontaneous_Adult,${adultStats[5]},,,, \n`;
-      csv += `Total All Utterances_Kid,${kidTotal},,,,Total All Utterances_Adult,${adultTotal},,,, \n`;
-
-      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-      const url = URL.createObjectURL(blob);
-      const aEl = document.createElement('a');
-      aEl.href = url;
-      aEl.download = recommendedFileName;
-      aEl.style.display = 'none';
-      document.body.appendChild(aEl);
-      aEl.click();
-      document.body.removeChild(aEl);
-      URL.revokeObjectURL(url);
       
-      statusText.textContent = `CSV saved as: ${recommendedFileName}`;
+      // Show appropriate totals based on mode
+      if(simpleMode){
+        csv += `Utterance_Kid,${kidStats[6]},,,,Utterance_Adult,${adultStats[6]},,,, \n`;
+      } else {
+        csv += `Unintelligible_Kid,${kidStats[1]},,,,Initiate-Offer_Adult,${adultStats[7]},,,, \n`;
+        csv += `Imitative_Kid,${kidStats[2]},,,,Prompt_Adult,${adultStats[8]},,,, \n`;
+        csv += `Verbal Prompt_Kid,${kidStats[3]},,,,Model_Adult,${adultStats[9]},,,, \n`;
+        csv += `Non-Verbal Prompt_Kid,${kidStats[4]},,,,Encourage_Adult,${adultStats[10]},,,, \n`;
+        csv += `Spontaneous_Kid,${kidStats[5]},,,,Instruct_Adult,${adultStats[11]},,,, \n`;
+        csv += `,,,,,Reinforce-Reward_Adult,${adultStats[12]},,,, \n`;
+        if(kidStats[6] > 0 || adultStats[6] > 0){
+          csv += `Utterance_Kid,${kidStats[6]},,,,Utterance_Adult,${adultStats[6]},,,, \n`;
+        }
+      }
+      
+      csv += `Total All Utterances_Kid,${kidTotal},,,,Total All Utterances_Adult,${adultTotal},,,, \n`;
+      return csv;
+    }
+
+    // Reset functionality - clears everything for fresh start
+    function resetAll(){
+      // Confirm before resetting to prevent accidental data loss
+      const hasData = annotations.length > 0;
+      if(hasData && !confirm('Are you sure you want to reset everything? All unsaved utterance codes will be lost.')){
+        return;
+      }
+
+      // Reset all annotations and state
+      annotations = [];
+      currentAnnotation = null;
+      isRecording = false;
+      hasUnsavedChanges = false;
+      lastSavedState = '';
+      loadedCsvFile = null;
+
+      // Reset video to beginning
+      if(video && (video.src || video.currentSrc)){
+        video.currentTime = 0;
+        video.pause();
+      }
+
+      // Clear active button state
+      if(activeButton){
+        activeButton.classList.remove('active');
+        activeButton = null;
+      }
+
+      // Hide subtitles
+      hideSubtitles();
+
+      // Update UI
+      updateAnnotationsList();
+      updateSaveButtonStates();
+      updateVideoTime();
+      
+      statusText.textContent = 'Reset complete - Ready for fresh start';
     }
 
     // Annotation recording - Proprietary implementation
@@ -581,7 +785,10 @@
 
       currentAnnotation = {speaker, option, startTime, endTime:null, note:''};
       isRecording = true;
-      statusText.textContent = `Recording ${speaker.toUpperCase()}: ${optionLabels[option]}...`;
+      
+      // Update status message based on mode
+      const optionName = simpleMode ? `${speaker.toUpperCase()} Utterance` : optionLabels[option];
+      statusText.textContent = `Recording ${optionName}...`;
     }
 
     function endAnnotation(e){
@@ -598,8 +805,12 @@
         currentAnnotation.duration = +(endTime - currentAnnotation.startTime).toFixed(3);
         annotations.push({...currentAnnotation});
         annotations.sort((a,b)=>a.startTime - b.startTime);
+        markAsChanged(); // Mark as changed when new annotation added
         updateAnnotationsList();
-        statusText.textContent = `Utterance coded: ${currentAnnotation.speaker.toUpperCase()}: ${optionLabels[currentAnnotation.option]}`;
+        
+        // Update status message based on mode
+        const optionName = simpleMode ? `${currentAnnotation.speaker.toUpperCase()} Utterance` : optionLabels[currentAnnotation.option];
+        statusText.textContent = `Utterance coded: ${optionName}`;
       }
       if(activeButton) activeButton.classList.remove('active');
       activeButton = null;
@@ -610,6 +821,7 @@
     // --- Keyboard Shortcut Support ---
     // Custom keyboard mapping system - Developer: Hamidreza Komaki (HKomaki@Stanford.edu)
     const keyMap = {
+      // Advanced mode keys
       // Kid
       'a': {speaker:'kid', option:1},
       's': {speaker:'kid', option:2},
@@ -617,11 +829,15 @@
       'f': {speaker:'kid', option:4},
       'v': {speaker:'kid', option:5},
       // Adult
-      'n': {speaker:'adult', option:1},
-      'j': {speaker:'adult', option:2},
-      'k': {speaker:'adult', option:3},
-      'l': {speaker:'adult', option:4},
-      ';': {speaker:'adult', option:5}, // Adult Spontaneous
+      'n': {speaker:'adult', option:7},  // Initiate-Offer
+      'j': {speaker:'adult', option:8},  // Prompt
+      'k': {speaker:'adult', option:9},  // Model
+      'l': {speaker:'adult', option:10}, // Encourage
+      ';': {speaker:'adult', option:11}, // Instruct
+      'm': {speaker:'adult', option:12}, // Reinforce-Reward
+      // Simple mode keys
+      'q': {speaker:'kid', option:6},    // Simple kid utterance
+      'w': {speaker:'adult', option:6},  // Simple adult utterance
     };
 
     function isTypingTarget(e){
@@ -635,13 +851,20 @@
 
     function startAnnotationKey(speaker, option){
       if(!video || (!video.src && !video.currentSrc)) return;
+      
+      // Check if the key is valid for current mode
+      if(simpleMode && option !== 6) return;
+      if(!simpleMode && option === 6) return;
+      
       const btn = findButton(speaker, option);
       if(btn){ btn.classList.add('active'); }
       activeButton = btn || null;
       const startTime = video.currentTime;
       currentAnnotation = {speaker, option, startTime, endTime:null, note:''};
       isRecording = true;
-      statusText.textContent = `Recording ${speaker.toUpperCase()}: ${optionLabels[option]}...`;
+      
+      const optionName = simpleMode ? `${speaker.toUpperCase()} Utterance` : optionLabels[option];
+      statusText.textContent = `Recording ${optionName}...`;
     }
 
     const heldKeys = new Set();
@@ -650,9 +873,14 @@
       if(isTypingTarget(e)) return;
       const k = (e.key || '').toLowerCase();
       if(keyMap[k] && !heldKeys.has(k)){
+        const {speaker, option} = keyMap[k];
+        
+        // Check if key is valid for current mode
+        if(simpleMode && option !== 6) return;
+        if(!simpleMode && option === 6) return;
+        
         e.preventDefault();
         heldKeys.add(k);
-        const {speaker, option} = keyMap[k];
         startAnnotationKey(speaker, option);
       }
     });
@@ -676,10 +904,14 @@
       annotations.forEach((a,idx)=>{
         const item = document.createElement('div');
         item.className = `annotation-item ${a.speaker}`;
+        
+        // Display appropriate label based on option type
+        const displayLabel = a.option === 6 ? 'Utterance' : optionLabels[a.option];
+        
         item.innerHTML = `
           <div class="annotation-info">
             <div class="annotation-speaker ${a.speaker}">${a.speaker.toUpperCase()}</div>
-            <div class="annotation-option">${optionLabels[a.option]}</div>
+            <div class="annotation-option">${displayLabel}</div>
             <div class="annotation-time">${formatTime(a.startTime)} - ${formatTime(a.endTime)} (${formatTime(a.duration)})</div>
             ${a.note ? `<div class="annotation-note" style="font-size:12px;color:#666;margin-top:2px;font-style:italic;">"${a.note}"</div>` : ''}
           </div>
@@ -696,8 +928,11 @@
     function updateStatsSummary(){
       const statsSummary = document.getElementById('statsSummary');
       if(annotations.length===0){ statsSummary.classList.add('hidden'); statsSummary.innerHTML=''; return; }
-      const kidStats={1:0,2:0,3:0,4:0,5:0}, adultStats={1:0,2:0,3:0,4:0,5:0};
-      annotations.forEach(a=>{ if(a.speaker==='kid') kidStats[a.option]++; else if(a.speaker==='adult') adultStats[a.option]++; });
+      const kidStats={1:0,2:0,3:0,4:0,5:0,6:0}, adultStats={7:0,8:0,9:0,10:0,11:0,12:0,6:0};
+      annotations.forEach(a=>{ 
+        if(a.speaker==='kid') kidStats[a.option]++; 
+        else if(a.speaker==='adult') adultStats[a.option]++; 
+      });
       const kidTotal = Object.values(kidStats).reduce((x,y)=>x+y,0);
       const adultTotal = Object.values(adultStats).reduce((x,y)=>x+y,0);
       statsSummary.innerHTML = `<div class="stats-row"><strong>Kid:</strong> ${kidTotal} | <strong>Adult:</strong> ${adultTotal} | <strong>Total:</strong> ${annotations.length}</div>`;
@@ -715,13 +950,47 @@
         }
       };
       video.addEventListener('timeupdate', stop);
-      statusText.textContent = `Playing ${a.speaker.toUpperCase()}: ${optionLabels[a.option]} utterance`;
+      
+      const displayLabel = a.option === 6 ? 'Utterance' : optionLabels[a.option];
+      statusText.textContent = `Playing ${a.speaker.toUpperCase()}: ${displayLabel} utterance`;
     }
 
     function editAnnotation(index){
       const a = annotations[index];
       const container = document.createElement('div');
       container.className = 'edit-form';
+      
+      // Build option dropdown based on current mode and speaker
+      let optionDropdown = '';
+      if(simpleMode){
+        optionDropdown = `
+          <option value="6" ${a.option===6?'selected':''}>Utterance</option>
+        `;
+      } else {
+        // Advanced mode - show appropriate options based on speaker
+        if(a.speaker === 'kid'){
+          optionDropdown = `
+            <option value="1" ${a.option===1?'selected':''}>Unintelligible</option>
+            <option value="2" ${a.option===2?'selected':''}>Imitative</option>
+            <option value="3" ${a.option===3?'selected':''}>Verbal Prompt</option>
+            <option value="4" ${a.option===4?'selected':''}>Non-Verbal Prompt</option>
+            <option value="5" ${a.option===5?'selected':''}>Spontaneous</option>
+            <option value="6" ${a.option===6?'selected':''}>Utterance</option>
+          `;
+        } else {
+          // Adult speaker - show only adult options
+          optionDropdown = `
+            <option value="7" ${a.option===7?'selected':''}>Initiate-Offer</option>
+            <option value="8" ${a.option===8?'selected':''}>Prompt</option>
+            <option value="9" ${a.option===9?'selected':''}>Model</option>
+            <option value="10" ${a.option===10?'selected':''}>Encourage</option>
+            <option value="11" ${a.option===11?'selected':''}>Instruct</option>
+            <option value="12" ${a.option===12?'selected':''}>Reinforce-Reward</option>
+            <option value="6" ${a.option===6?'selected':''}>Utterance</option>
+          `;
+        }
+      }
+      
       container.innerHTML = `
         <div>
           <label>Speaker:</label>
@@ -733,18 +1002,26 @@
         <div>
           <label>Type:</label>
           <select id="editOption${index}">
-            <option value="1" ${a.option===1?'selected':''}>Unintelligible</option>
-            <option value="2" ${a.option===2?'selected':''}>Imitative</option>
-            <option value="3" ${a.option===3?'selected':''}>Verbal Prompt</option>
-            <option value="4" ${a.option===4?'selected':''}>Non-Verbal Prompt</option>
-            <option value="5" ${a.option===5?'selected':''}>Spontaneous</option>
+            ${optionDropdown}
           </select>
         </div>
         <div>
           <label>Start:</label>
-          <input type="text" id="editStart${index}" value="${formatTime(a.startTime)}">
-          <label>End:</label>
-          <input type="text" id="editEnd${index}" value="${formatTime(a.endTime)}">
+          <div style="display:inline-flex;align-items:center;gap:5px;">
+            <input type="text" id="editStart${index}" value="${formatTime(a.startTime)}" style="width:80px;">
+            <div style="display:flex;flex-direction:column;">
+              <button type="button" onclick="adjustTime('editStart${index}', 0.1)" style="padding:2px 6px;font-size:10px;line-height:1;">▲</button>
+              <button type="button" onclick="adjustTime('editStart${index}', -0.1)" style="padding:2px 6px;font-size:10px;line-height:1;">▼</button>
+            </div>
+          </div>
+          <label style="margin-left:10px;">End:</label>
+          <div style="display:inline-flex;align-items:center;gap:5px;">
+            <input type="text" id="editEnd${index}" value="${formatTime(a.endTime)}" style="width:80px;">
+            <div style="display:flex;flex-direction:column;">
+              <button type="button" onclick="adjustTime('editEnd${index}', 0.1)" style="padding:2px 6px;font-size:10px;line-height:1;">▲</button>
+              <button type="button" onclick="adjustTime('editEnd${index}', -0.1)" style="padding:2px 6px;font-size:10px;line-height:1;">▼</button>
+            </div>
+          </div>
         </div>
         <div>
           <label>Note:</label>
@@ -768,6 +1045,17 @@
 
     function cancelEdit(){ updateAnnotationsList(); }
 
+    function adjustTime(inputId, delta){
+      const input = document.getElementById(inputId);
+      if(!input) return;
+      
+      const currentTime = parseTime(input.value);
+      if(!isFinite(currentTime)) return;
+      
+      const newTime = Math.max(0, currentTime + delta); // Prevent negative times
+      input.value = formatTime(newTime);
+    }
+
     function saveEdit(index){
       const speaker = document.getElementById(`editSpeaker${index}`).value;
       const option = parseInt(document.getElementById(`editOption${index}`).value,10);
@@ -778,6 +1066,7 @@
       if(isFinite(startTime) && isFinite(endTime) && endTime>startTime){
         annotations[index] = { speaker, option, startTime, endTime, duration:+(endTime-startTime).toFixed(3), note };
         annotations.sort((a,b)=>a.startTime - b.startTime);
+        markAsChanged(); // Mark as changed when annotation edited
         statusText.textContent = 'Utterance code updated';
       }
       updateAnnotationsList();
@@ -786,6 +1075,7 @@
     function deleteAnnotation(index){
       if(confirm('Are you sure you want to delete this utterance code?')){
         annotations.splice(index,1);
+        markAsChanged(); // Mark as changed when annotation deleted
         updateAnnotationsList();
         statusText.textContent = 'Utterance code deleted';
       }
@@ -823,14 +1113,16 @@
 
       if(adultAnn){ 
         subtitleAdult.style.display='block'; 
-        subtitleAdult.textContent = `ADULT: ${optionLabels[adultAnn.option]}`; 
+        const label = adultAnn.option === 6 ? 'Utterance' : optionLabels[adultAnn.option];
+        subtitleAdult.textContent = `ADULT: ${label}`; 
       } else {
         subtitleAdult.style.display='none';
       }
 
       if(kidAnn){ 
         subtitleKid.style.display='block'; 
-        subtitleKid.textContent = `KID: ${optionLabels[kidAnn.option]}`; 
+        const label = kidAnn.option === 6 ? 'Utterance' : optionLabels[kidAnn.option];
+        subtitleKid.textContent = `KID: ${label}`; 
       } else {
         subtitleKid.style.display='none';
       }
